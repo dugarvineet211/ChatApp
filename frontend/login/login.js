@@ -7,12 +7,11 @@ function login(e) {
         email: form.get("email"),
         password: form.get("password")
     }
-    console.log(loginDetails)
     axios.post('http://localhost:3000/user/login',loginDetails).then(response => {
         if(response.status === 200){
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('userDetails', JSON.stringify(response.data.user))
-            window.location.href = "../chat/chat.html"
+            window.location.href = "../chat-app/chat.html"
         } else {
             throw new Error('Failed to login');
         }
