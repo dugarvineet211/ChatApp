@@ -1,4 +1,5 @@
 const brcypt=require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User=require('../models/user');
 
 exports.signup=(req,res,next)=>{
@@ -18,3 +19,33 @@ exports.signup=(req,res,next)=>{
           });
       });
   }
+
+  function generateAccessToken(id) {
+    return jwt.sign(id ,process.env.TOKEN_SECRET);
+}
+
+exports.login = (req, res) => {
+    const { email, password } = req.body;
+    User.findAll({ where : { email }}).then(user => {
+        if(user.length > 0){
+            brcypt.compare(password, user[0].password, function(err, response) {
+                if (err){
+                console.log(err)
+                return res.json({success: false, message: 'Something went wrong'})
+                }
+                if (response)
+                {
+                    const jwttoken = generateAccessToken(user[0].id);
+                    res.status(200).json({token: jwttoken, success: true, message: 'Successfully Logged In',user:user[0]})
+                } 
+                else 
+                {
+                return res.status(401).json({success: false, message: 'Wrong Password! Please try again!'});
+                }
+            });
+        } 
+        else {
+            return res.status(404).json({success: false, message: 'User does not exist!'})
+        }
+    })
+}
